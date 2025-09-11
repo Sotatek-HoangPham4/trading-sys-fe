@@ -70,7 +70,7 @@ export default function Home() {
           />
           <div className="h-10 w-full bg-[#0F0F0F] rounded-t"></div>
         </div>
-        <div className="min-w-96 h-auto bg-[#0F0F0F] rounded-tl"></div>
+        {/* <div className="min-w-96 h-auto bg-[#0F0F0F] rounded-tl"></div> */}
       </div>
     </main>
   );

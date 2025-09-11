@@ -13,6 +13,7 @@ import {
   CandlestickData,
   IChartApi,
   ISeriesApi,
+  LineSeries,
   UTCTimestamp,
   type ISeriesMarkersPluginApi,
 } from "lightweight-charts";
@@ -31,6 +32,7 @@ import { addLineSeries } from "@/application/chart/addLineSeries";
 import { useReplay } from "@/presentation/hooks/useReplay";
 import { setupReplayClickHandler } from "@/application/chart/setupReplayClickHandler";
 import IndicatorToolbar from "./IndicatorToolbar";
+import { addBOSLabel } from "@/application/chart/addBOSLabel";
 
 export default function CandlestickChart({
   timeframe,
@@ -201,9 +203,38 @@ export default function CandlestickChart({
     rsiRef.current = addRSISeries(chart, candleData, 14, "purple", 2, showRSI);
     lineSeriesRef.current = addLineSeries(chart, "lime", 1);
 
+    const pointA = {
+      time: candleData[candleData.length - 26].time as UTCTimestamp,
+      value: candleData[candleData.length - 26].low, // đáy trước
+    };
+
+    const pointB = {
+      time: candleData[candleData.length - 5].time as UTCTimestamp,
+      value: candleData[candleData.length - 5].high, // đỉnh breakout
+    };
+    const bosSeries = chart.addSeries(LineSeries, {
+      color: "white",
+      lineWidth: 1,
+    });
+
+    bosSeries.setData([
+      { time: pointA.time, value: pointA.value },
+      { time: pointB.time, value: pointB.value },
+    ]);
+
+    const cleanupBOS = addBOSLabel(
+      chart,
+      chartContainerRef.current!,
+      bosSeries,
+      pointA,
+      pointB
+    );
+
     return () => {
       chart.unsubscribeCrosshairMove(crosshairCallback);
       resizeObserver.disconnect();
+      if (cleanupBOS) cleanupBOS();
+      chart.removeSeries(bosSeries);
       chart.remove();
     };
   }, [theme, timeframe, showEMA, showRSI, showVolume, heightChart]);
