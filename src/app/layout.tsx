@@ -1,11 +1,12 @@
+"use client";
+
 import { GeistSans } from "geist/font/sans";
 import "./globals.css";
 import { ThemeProvider } from "next-themes";
-
-export const metadata = {
-  title: "My App",
-  description: "Using Geist Font",
-};
+import { Provider } from "react-redux";
+import { Toaster } from "react-hot-toast";
+import { persistor, store } from "@/store";
+import { PersistGate } from "redux-persist/integration/react";
 
 export default function RootLayout({
   children,
@@ -15,9 +16,27 @@ export default function RootLayout({
   return (
     <html lang="en" className={GeistSans.variable} suppressHydrationWarning>
       <body className="font-sans">
-        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-          {children}
-        </ThemeProvider>
+        <Provider store={store}>
+          <PersistGate loading={null} persistor={persistor}>
+            <Toaster
+              position="top-center"
+              reverseOrder={false}
+              toastOptions={{
+                duration: 3000,
+                style: {
+                  fontSize: 13,
+                  background: "#222",
+                  color: "#fff",
+                  borderRadius: "10px",
+                  padding: "8px 16px",
+                },
+              }}
+            />
+            <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
+          </PersistGate>
+        </Provider>
       </body>
     </html>
   );
